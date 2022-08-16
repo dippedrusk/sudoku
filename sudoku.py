@@ -1,4 +1,3 @@
-#!/bin/python3
 from itertools import product
 
 DIM='\x1b[2m'
