@@ -48,6 +48,16 @@ class Sudoku:
         else:
             raise ValueError
 
+    def reveal(self, n=None):
+        if not n:
+            self.puzzle = self.solution
+        else:
+            coords = [(x,y) for (x,y) in product(range(0,9), repeat=2) if self.is_empty(x, y)]
+            random.shuffle(coords)
+            for i in range(min(n, len(coords))):
+                (x,y) = coords[i]
+                self.set(x, y, self.solution[x][y])
+
     def __str__(self):
         puzzle = f'  {DIM}' + '— '*13 + f'{RESET}\n'
         for i, row in enumerate(self.puzzle):
