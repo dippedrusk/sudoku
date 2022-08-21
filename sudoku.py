@@ -1,3 +1,5 @@
+import random
+from copy import deepcopy
 from itertools import product
 
 DIM='\x1b[2m'
@@ -7,6 +9,7 @@ RESET='\x1b[22m'
 class Sudoku:
     def __init__(self, puzzle):
         self.puzzle = puzzle
+        self.solution = None
 
     @classmethod
     def from_empty(cls):
@@ -58,6 +61,27 @@ class Sudoku:
         puzzle += f'  {DIM}' + '— '*13 + RESET
         return puzzle
 
+def generate(n_clues):
+    sudoku = Sudoku.from_empty()
+    coordss = set()
+    while len(coordss) != n_clues:
+        x = random.choice(range(0,9))
+        y = random.choice(range(0,9))
+        coordss.add((x,y))
+    for (x,y) in coordss:
+        numbers = list(range(1,10))
+        random.shuffle(numbers)
+        for n in numbers:
+            try:
+                sudoku.set(x, y, n)
+            except ValueError:
+                continue
+    solution = solve(deepcopy(sudoku))
+    if not solution:
+        return generate(n_clues)
+    sudoku.solution = solution
+    return sudoku
+
 def solve(sudoku):
     for (x, y) in product(range(0,9), repeat=2):
         if sudoku.is_empty(x, y):
@@ -82,24 +106,16 @@ def clean_input(string):
     return 'help'
 
 def main():
-    puzzle = [[1, 2, 3, 4, 5, 6, 7, 8, 9],
-              [0, 0, 0, 7, 0, 8, 0, 0, 0],
-              [0, 0, 0, 1, 0, 0, 0, 0, 0],
-              [0, 0, 0, 2, 0, 0, 0, 0, 0],
-              [0, 0, 0, 3, 0, 0, 0, 0, 0],
-              [0, 0, 0, 8, 0, 0, 0, 0, 0],
-              [0, 0, 0, 9, 0, 0, 0, 0, 0],
-              [9, 7, 8, 5, 4, 1, 3, 6, 2],
-              [5, 4, 1, 6, 3, 2, 9, 7, 8]]
-    sudoku = Sudoku.from_puzzle(puzzle)
+    sudoku = generate(19)
 
     while True:
         inp = clean_input(input('What should I do? (see | solve) '))
         if inp == 'see':
             print(sudoku)
         elif inp == 'solve':
-            solution = solve(sudoku)
-            print(solution)
+            if not sudoku.solution:
+                sudoku.solution = solve(sudoku)
+            print(sudoku.solution)
         else:
             print("I couldn't parse your input :( try again")
         print()
