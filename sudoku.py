@@ -8,6 +8,15 @@ class Sudoku:
     def __init__(self, puzzle):
         self.puzzle = puzzle
 
+    @classmethod
+    def from_empty(cls):
+        puzzle = [[0] * 9 for _ in range(9)]
+        return cls(puzzle)
+
+    @classmethod
+    def from_puzzle(cls, puzzle):
+        return cls(puzzle)
+
     def get_box_coords(self, x, y):
         start_x = x // 3 * 3
         start_y = y // 3 * 3
@@ -82,7 +91,7 @@ def main():
               [0, 0, 0, 9, 0, 0, 0, 0, 0],
               [9, 7, 8, 5, 4, 1, 3, 6, 2],
               [5, 4, 1, 6, 3, 2, 9, 7, 8]]
-    sudoku = Sudoku(puzzle)
+    sudoku = Sudoku.from_puzzle(puzzle)
 
     while True:
         inp = clean_input(input('What should I do? (see | solve) '))
