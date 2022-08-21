@@ -80,7 +80,7 @@ def generate(n_clues):
     solution = solve(deepcopy(sudoku), finish_by=time_now()+0.1)
     if not solution:
         return generate(n_clues)
-    sudoku.solution = solution
+    sudoku.solution = solution.puzzle
     return sudoku
 
 def solve(sudoku, finish_by=None):
@@ -117,7 +117,7 @@ def main():
             print(sudoku)
         elif inp == 'solve':
             if not sudoku.solution:
-                sudoku.solution = solve(sudoku)
+                sudoku.solution = solve(deepcopy(sudoku)).puzzle
             print(sudoku.solution)
         else:
             print("I couldn't parse your input :( try again")
