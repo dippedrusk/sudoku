@@ -6,6 +6,7 @@ from timeit import default_timer as time_now
 DIM='\x1b[2m'
 BOLD='\x1b[1m'
 RESET='\x1b[22m'
+COMMANDS = ['look', 'guess', 'hint', 'solve', 'new', 'quit']
 
 class Sudoku:
     def __init__(self, puzzle):
@@ -113,24 +114,36 @@ def solve(sudoku, finish_by=None):
 
 def clean_input(string):
     string = string.strip().lower()
-    for command in ['see', 'solve']:
-        if command in string:
-            return command
+    for command in COMMANDS:
+        if command in string or command[0] == string:
+            return command[0]
     return 'help'
 
 def main():
     sudoku = generate(19)
 
     while True:
-        inp = clean_input(input('What should I do? (see | solve) '))
-        if inp == 'see':
-            print(sudoku)
-        elif inp == 'solve':
+        inp = clean_input(input(f"What should I do? ({' | '.join(COMMANDS)}) "))
+        if inp == 'l':
+            pass
+        elif inp == 'g':
+            print('Not implemented yet :(')
+            continue
+        elif inp == 'h':
+            sudoku.reveal(1)
+        elif inp == 's':
             if not sudoku.solution:
                 sudoku.solution = solve(deepcopy(sudoku)).puzzle
-            print(sudoku.solution)
+            sudoku.reveal()
+        elif inp == 'n':
+            sudoku = generate(19)
+        elif inp == 'q':
+            print('Goodbye')
+            break
         else:
             print("I couldn't parse your input :( try again")
+            continue
+        print(sudoku)
         print()
 
 if __name__ == '__main__':
