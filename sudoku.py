@@ -1,6 +1,7 @@
 import random
 from copy import deepcopy
 from itertools import product
+from timeit import default_timer as time_now
 
 DIM='\x1b[2m'
 BOLD='\x1b[1m'
@@ -76,13 +77,15 @@ def generate(n_clues):
                 sudoku.set(x, y, n)
             except ValueError:
                 continue
-    solution = solve(deepcopy(sudoku))
+    solution = solve(deepcopy(sudoku), finish_by=time_now()+0.1)
     if not solution:
         return generate(n_clues)
     sudoku.solution = solution
     return sudoku
 
-def solve(sudoku):
+def solve(sudoku, finish_by=None):
+    if time_now() > finish_by:
+        return None
     for (x, y) in product(range(0,9), repeat=2):
         if sudoku.is_empty(x, y):
             for n in range(1,10):
@@ -91,7 +94,7 @@ def solve(sudoku):
                 except ValueError:
                     continue
                 else:
-                    solution = solve(sudoku)
+                    solution = solve(sudoku, finish_by=finish_by)
                     if solution:
                         return solution
                     sudoku.set(x, y, 0)
