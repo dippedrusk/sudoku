@@ -121,6 +121,19 @@ def clean_input(string):
             return command[0]
     return 'help'
 
+def draw_borders(window, cx=0, cy=0):
+    window.addstr(cx, cy, '— '*13, curses.A_DIM)
+    window.addstr(cx+12, cy, '— '*13, curses.A_DIM)
+    for x in range(cx+1, cx+12):
+        window.addstr(x, cy, '|', curses.A_DIM)
+        window.addstr(x, cy+8, '|', curses.A_DIM)
+        window.addstr(x, cy+16, '|', curses.A_DIM)
+        window.addstr(x, cy+24, '|', curses.A_DIM)
+    window.addstr(cx+4, cy, '-'*25, curses.A_DIM)
+    window.addstr(cx+8, cy, '-'*25, curses.A_DIM)
+    window.addstr(cx+4, cy+24, '-', curses.A_DIM)
+    window.addstr(cx+8, cy+24, '-', curses.A_DIM)
+
 def main(stdscr):
     stdscr.clear()
     sudoku = generate(19)
@@ -130,6 +143,10 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
 
     err_win = curses.newwin(1, 0, 1, 0)
+
+    # create sudoku window
+    height, width = 14, 25
+    sudoku_win = curses.newwin(height, width, 2, 2)
 
     while True:
         stdscr.addstr(0, 0, f"What should I do? ({' | '.join(COMMANDS)}) ", curses.color_pair(1))
@@ -150,6 +167,7 @@ def main(stdscr):
                 sudoku.solution = solve(deepcopy(sudoku)).puzzle
             sudoku.reveal()
         elif inp == ord('n'):
+            sudoku_win.clear()
             sudoku = generate(19)
         elif inp == ord('q'):
             break
@@ -158,6 +176,8 @@ def main(stdscr):
             err_win.addstr("I couldn't parse your input :( try again", curses.color_pair(2))
             continue
         err_win.clear()
+        draw_borders(sudoku_win)
+        sudoku_win.refresh()
 
 if __name__ == '__main__':
     try:
