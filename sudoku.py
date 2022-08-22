@@ -121,6 +121,14 @@ def clean_input(string):
             return command[0]
     return 'help'
 
+def print_sudoku(win, sudoku):
+    for i, row in enumerate(sudoku.puzzle):
+        for j, number in enumerate(row):
+            x_offset = i // 3
+            y_offset = (j // 3) * 2
+            n = '' if number == 0 else str(number)
+            win.addstr(i+x_offset+1, j*2+y_offset+2, n, curses.color_pair(1))
+
 def draw_borders(window, cx=0, cy=0):
     window.addstr(cx, cy, '— '*13, curses.A_DIM)
     window.addstr(cx+12, cy, '— '*13, curses.A_DIM)
@@ -177,6 +185,7 @@ def main(stdscr):
             continue
         err_win.clear()
         draw_borders(sudoku_win)
+        print_sudoku(sudoku_win, sudoku)
         sudoku_win.refresh()
 
 if __name__ == '__main__':
