@@ -1,4 +1,6 @@
+import curses
 import random
+from curses import wrapper
 from copy import deepcopy
 from itertools import product
 from timeit import default_timer as time_now
@@ -119,36 +121,42 @@ def clean_input(string):
             return command[0]
     return 'help'
 
-def main():
+def main(stdscr):
+    stdscr.clear()
     sudoku = generate(19)
 
+    # initialize some colours
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+
     while True:
-        inp = clean_input(input(f"What should I do? ({' | '.join(COMMANDS)}) "))
-        if inp == 'l':
+        stdscr.addstr(0, 0, f"What should I do? ({' | '.join(COMMANDS)}) ", curses.color_pair(1))
+        stdscr.refresh()
+        curses.echo()
+        inp = stdscr.getch()
+        if inp == ord('l'):
             pass
-        elif inp == 'g':
-            print('Not implemented yet :(')
+        elif inp == ord('g'):
+            stdscr.addstr(1, 0, 'Not implemented yet :(', curses.color_pair(2))
             continue
-        elif inp == 'h':
+        elif inp == ord('h'):
             sudoku.reveal(1)
-        elif inp == 's':
+        elif inp == ord('s'):
             if not sudoku.solution:
                 sudoku.solution = solve(deepcopy(sudoku)).puzzle
             sudoku.reveal()
-        elif inp == 'n':
+        elif inp == ord('n'):
             sudoku = generate(19)
-        elif inp == 'q':
-            print('Goodbye')
+        elif inp == ord('q'):
             break
         else:
-            print("I couldn't parse your input :( try again")
+            stdscr.addstr(1, 0, "I couldn't parse your input :( try again", curses.color_pair(2))
             continue
-        print(sudoku)
-        print()
+        stdscr.clear()
 
 if __name__ == '__main__':
     try:
-        main()
+        wrapper(main)
     except KeyboardInterrupt:
         print()
         print('Goodbye!')
