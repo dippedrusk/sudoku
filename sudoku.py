@@ -129,15 +129,19 @@ def main(stdscr):
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
 
+    err_win = curses.newwin(1, 0, 1, 0)
+
     while True:
         stdscr.addstr(0, 0, f"What should I do? ({' | '.join(COMMANDS)}) ", curses.color_pair(1))
+        err_win.refresh()
         stdscr.refresh()
         curses.echo()
         inp = stdscr.getch()
         if inp == ord('l'):
             pass
         elif inp == ord('g'):
-            stdscr.addstr(1, 0, 'Not implemented yet :(', curses.color_pair(2))
+            err_win.clear()
+            err_win.addstr('Not implemented yet :(', curses.color_pair(2))
             continue
         elif inp == ord('h'):
             sudoku.reveal(1)
@@ -150,9 +154,10 @@ def main(stdscr):
         elif inp == ord('q'):
             break
         else:
-            stdscr.addstr(1, 0, "I couldn't parse your input :( try again", curses.color_pair(2))
+            err_win.clear()
+            err_win.addstr("I couldn't parse your input :( try again", curses.color_pair(2))
             continue
-        stdscr.clear()
+        err_win.clear()
 
 if __name__ == '__main__':
     try:
