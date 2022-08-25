@@ -142,6 +142,40 @@ def draw_borders(window, cx=0, cy=0):
     window.addstr(cx+4, cy+24, '-', curses.A_DIM)
     window.addstr(cx+8, cy+24, '-', curses.A_DIM)
 
+def convert(x, y):
+    x_offset = x // 3
+    y_offset = (y // 3) * 2
+    return x + x_offset + 1, y*2 + y_offset + 2
+
+def guess_loop(sudoku_win):
+    x,y = 4,4
+    wx,wy = convert(x,y)
+    sudoku_win.move(wx, wy)
+    sudoku_win.refresh()
+    sudoku_win.keypad(True)
+    while True:
+        inp = sudoku_win.getch(wx, wy)
+        if inp == 27: # escape
+            break
+        # navigation
+        if inp == curses.KEY_UP:
+            x = max(0, x-1)
+        elif inp == curses.KEY_DOWN:
+            x = min(x+1, 8)
+        elif inp == curses.KEY_LEFT:
+            y = max(0, y-1)
+        elif inp == curses.KEY_RIGHT:
+            y = min(y+1, 8)
+        elif inp == ord('\t'): # tab
+            y, prev_y = min(y+1, 8), y
+            if y == prev_y:
+                x = min(x+1, 8)
+                y = 0
+        wx,wy = convert(x,y)
+        sudoku_win.move(wx, wy)
+        sudoku_win.refresh()
+    sudoku_win.keypad(False)
+
 def main(stdscr):
     stdscr.clear()
     sudoku = generate(19)
@@ -162,12 +196,11 @@ def main(stdscr):
         stdscr.refresh()
         curses.echo()
         inp = stdscr.getch()
+        curses.noecho()
         if inp == ord('l'):
             pass
         elif inp == ord('g'):
-            err_win.clear()
-            err_win.addstr('Not implemented yet :(', curses.color_pair(2))
-            continue
+            guess_loop(sudoku_win)
         elif inp == ord('h'):
             sudoku.reveal(1)
         elif inp == ord('s'):
