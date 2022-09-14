@@ -2,13 +2,21 @@ import curses
 import random
 from copy import deepcopy
 from curses import wrapper
+from enum import Enum
 from itertools import product
 from timeit import default_timer as time_now
 
 DIM='\x1b[2m'
 BOLD='\x1b[1m'
 RESET='\x1b[22m'
-COMMANDS = ['look', 'guess', 'hint', 'solve', 'new', 'quit']
+
+class Command(Enum):
+    LOOK = ord('l')
+    GUESS = ord('g')
+    HINT = ord('h')
+    SOLVE = ord('s')
+    NEW = ord('n')
+    QUIT = ord('q')
 
 class Sudoku:
     def __init__(self, puzzle):
@@ -114,13 +122,6 @@ def solve(sudoku, finish_by=None):
             return None
     return sudoku
 
-def clean_input(string):
-    string = string.strip().lower()
-    for command in COMMANDS:
-        if command in string or command[0] == string:
-            return command[0]
-    return 'help'
-
 def print_sudoku(win, sudoku):
     for i, row in enumerate(sudoku.puzzle):
         for j, number in enumerate(row):
@@ -191,32 +192,35 @@ def main(stdscr):
     sudoku_win = curses.newwin(height, width, 2, 2)
 
     while True:
-        stdscr.addstr(0, 0, f"What should I do? ({' | '.join(COMMANDS)}) ", curses.color_pair(1))
-        err_win.refresh()
+        stdscr.addstr(0, 0, f"What should I do? ({' | '.join([c.name for c in list(Command)])}) ", curses.color_pair(1))
         stdscr.refresh()
         curses.echo()
         inp = stdscr.getch()
         curses.noecho()
-        if inp == ord('l'):
+
+        if inp not in [c.value for c in list(Command)]:
+            err_win.clear()
+            err_win.addstr("I couldn't parse your input :( try again", curses.color_pair(2))
+            err_win.refresh()
+            continue
+
+        err_win.clear()
+        err_win.refresh()
+        if inp == Command.LOOK.value:
             pass
-        elif inp == ord('g'):
+        elif inp == Command.GUESS.value:
             guess_loop(sudoku_win)
-        elif inp == ord('h'):
+        elif inp == Command.HINT.value:
             sudoku.reveal(1)
-        elif inp == ord('s'):
+        elif inp == Command.SOLVE.value:
             if not sudoku.solution:
                 sudoku.solution = solve(deepcopy(sudoku)).puzzle
             sudoku.reveal()
-        elif inp == ord('n'):
+        elif inp == Command.NEW.value:
             sudoku_win.clear()
             sudoku = generate(19)
-        elif inp == ord('q'):
+        elif inp == Command.QUIT.value:
             break
-        else:
-            err_win.clear()
-            err_win.addstr("I couldn't parse your input :( try again", curses.color_pair(2))
-            continue
-        err_win.clear()
         draw_borders(sudoku_win)
         print_sudoku(sudoku_win, sudoku)
         sudoku_win.refresh()
