@@ -21,6 +21,7 @@ class Command(Enum):
 class Sudoku:
     def __init__(self, puzzle):
         self.puzzle = puzzle
+        self.fixed = puzzle
         self.solution = None
 
     @classmethod
@@ -68,6 +69,7 @@ class Sudoku:
             for i in range(min(n, len(coords))):
                 (x,y) = coords[i]
                 self.set(x, y, self.solution[x][y])
+                self.fixed[x][y] = self.solution[x][y]
 
     def __str__(self):
         puzzle = f'  {DIM}' + '— '*13 + f'{RESET}\n'
@@ -101,6 +103,7 @@ def generate(n_clues):
     solution = solve(deepcopy(sudoku), finish_by=time_now()+0.1)
     if not solution:
         return generate(n_clues)
+    sudoku.fixed = deepcopy(sudoku.puzzle)
     sudoku.solution = solution.puzzle
     return sudoku
 
@@ -148,7 +151,8 @@ def convert(x, y):
     y_offset = (y // 3) * 2
     return x + x_offset + 1, y*2 + y_offset + 2
 
-def guess_loop(sudoku_win):
+def guess_loop(sudoku_win, sudoku):
+    staged_guesses = {}
     x,y = 4,4
     wx,wy = convert(x,y)
     sudoku_win.move(wx, wy)
@@ -157,6 +161,13 @@ def guess_loop(sudoku_win):
     while True:
         inp = sudoku_win.getch(wx, wy)
         if inp == 27: # escape
+            # commit staged guesses
+            for (x, y), n in staged_guesses.items():
+                try:
+                    sudoku.set(x, y, n)
+                    sudoku.fixed[x][y] = n
+                except ValueError:
+                    pass
             break
         # navigation
         if inp == curses.KEY_UP:
@@ -172,6 +183,15 @@ def guess_loop(sudoku_win):
             if y == prev_y:
                 x = min(x+1, 8)
                 y = 0
+        # entry / deletion
+        elif sudoku.fixed[x][y] == 0 and inp in range(ord('0'), ord('9')+1):
+            n = int(chr(inp))
+            if n == 0:
+                del staged_guesses[(x, y)]
+                sudoku_win.addch(' ')
+            else:
+                staged_guesses[(x, y)] = n
+                sudoku_win.addch(str(n))
         wx,wy = convert(x,y)
         sudoku_win.move(wx, wy)
         sudoku_win.refresh()
@@ -209,7 +229,7 @@ def main(stdscr):
         if inp == Command.LOOK.value:
             pass
         elif inp == Command.GUESS.value:
-            guess_loop(sudoku_win)
+            guess_loop(sudoku_win, sudoku)
         elif inp == Command.HINT.value:
             sudoku.reveal(1)
         elif inp == Command.SOLVE.value:
