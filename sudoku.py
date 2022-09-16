@@ -187,7 +187,10 @@ def guess_loop(sudoku_win, sudoku):
         elif sudoku.fixed[x][y] == 0 and inp in range(ord('0'), ord('9')+1):
             n = int(chr(inp))
             if n == 0:
-                del staged_guesses[(x, y)]
+                try:
+                    del staged_guesses[(x, y)]
+                except KeyError:
+                    pass
                 sudoku_win.addch(' ')
             else:
                 staged_guesses[(x, y)] = n
