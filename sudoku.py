@@ -108,7 +108,7 @@ def generate(n_clues):
     return sudoku
 
 def solve(sudoku, finish_by=None):
-    if time_now() > finish_by:
+    if finish_by and time_now() > finish_by:
         return None
     for (x, y) in product(range(0,9), repeat=2):
         if sudoku.is_empty(x, y):
