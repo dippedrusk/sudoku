@@ -168,6 +168,14 @@ def guess_loop(sudoku_win, sudoku):
                     sudoku.fixed[x][y] = n
                 except ValueError:
                     pass
+            recompute_solution = False
+            for (x, y) in staged_guesses:
+                if sudoku.puzzle[x][y] == sudoku.solution[x][y]:
+                    sudoku.fixed[x][y] = n
+                else:
+                    recompute_solution = True
+            if recompute_solution:
+                sudoku.solution = solve(deepcopy(sudoku)).puzzle
             break
         # navigation
         if inp == curses.KEY_UP:
